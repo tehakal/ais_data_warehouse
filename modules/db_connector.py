@@ -29,7 +29,7 @@ class DbConnector:
             input('Press enter to continue.')
             sys.exit()
 
-    def drop_table(self, table:str):
-        sql_str = "DROP TABLE " + table + ";"
+    def drop_table(self):
+        sql_str = "DROP TABLE " + self.table + ";"
         self.__exec_sql(sql_str)
 

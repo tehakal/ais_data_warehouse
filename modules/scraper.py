@@ -30,7 +30,8 @@ class Scraper():
 
 
     def initialize_driver(self) -> object:
-        s = Service(executable_path=ChromeDriverManager().install())
+        #s = Service(executable_path=ChromeDriverManager().install())
+        s = Service(executable_path="C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe")  # change path or use webdriver-manager
         options = Options()
         if self.__headless:
             options.add_argument('--headless')
@@ -62,7 +63,8 @@ class Scraper():
 
 
     def next_page(self) -> bool:
-        next_page = self.driver.find_element('xpath','//*[@id="skip-to-content"]/div/div[4]/div[2]/div[2]/div[1]/div[2]/div[1]/nav/ul/li[6]')
+        next_page = self.driver.find_element('xpath','/html/body/div[2]/div[1]/div[2]/div[1]/div/div[1]/div[3]/div/div/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/nav/ul/li[last()]')  # select last element of page buttons (next button) - maybe needs to be altered depending on request
+
         next_page_html = next_page.get_attribute('innerHTML')
         next_page.click()
         
@@ -113,6 +115,7 @@ class Scraper():
                 self.DbConn.insert_db(db_entry)
 
             print(f'PageNr.: {self.scraped_pages}')
+            print(f'elements: {len(self.elements)}')
 
             self.next_page()
         

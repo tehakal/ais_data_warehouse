@@ -1,5 +1,6 @@
 import psycopg2 as pg
 from psycopg2.errors import DuplicateTable
+import sys
 
 class DbConnector:
     '''
@@ -26,6 +27,7 @@ class DbConnector:
         except DuplicateTable:
             print('Table ' + self.table + ' already exists!')
             input('Press enter to continue.')
+            sys.exit()
 
     def drop_table(self, table:str):
         sql_str = "DROP TABLE " + table + ";"

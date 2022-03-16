@@ -1,7 +1,7 @@
 import psycopg2 as pg
 from psycopg2.errors import DuplicateTable
 
-class db_connector:
+class DbConnector:
     '''
     Class which provides functions to insert data entries, create relevant table and drop tables.
     '''

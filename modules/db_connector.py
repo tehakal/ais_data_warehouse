@@ -12,6 +12,7 @@ class DbConnector:
         self.table = table
 
     def __exec_sql(self, sql_str:str, data_entry_vars:dict=None) -> None:
+        '''Opens, commits and closes the connection to the database while executing sql statement'''
         with pg.connect(self.dsn) as conn:
             with conn.cursor() as cur:
                 cur.execute(sql_str, vars=data_entry_vars)
@@ -25,6 +26,7 @@ class DbConnector:
         try:
             self.__exec_sql(sql_str)
         except DuplicateTable:
+            '''Safety measure to avoid overwriting table'''
             print('Table ' + self.table + ' already exists!')
             input('Press enter to continue.')
             sys.exit()
@@ -32,4 +34,4 @@ class DbConnector:
     def drop_table(self):
         sql_str = "DROP TABLE " + self.table + ";"
         self.__exec_sql(sql_str)
-
+        

@@ -10,18 +10,20 @@ from datetime import datetime
 import time
 from .db_connector import DbConnector
 
-# create browser and launch website
 
 class Scraper():
+    '''Class which provides functions for scraping'''
 
     def __init__(self, link:str, table:str, next_link:str, headless:bool=True) -> None:
-        self.__headless = headless
+        self.__headless = headless  # allows to diable headless option for test purposes
+
+        '''regex patterns to locate necessary elements'''
         self._pattern_room = re.compile(r'\d+(?=<\/span><span class=\"Text-sc-10o2fdq-0 iyzLep\"> (<!-- -->)?Zimmer)')
         self._pattern_footage = re.compile(r'\d+(?=<\/span><span class=\"Text-sc-10o2fdq-0 iyzLep\"> (<!-- -->)?m²)')
         self._pattern_features = re.compile(r'(?<=<span class=\"Text-sc-10o2fdq-0 iyzLep\"> )(?:<!-- -->|)[a-zA-Z/\u00fc\u00f6\u00e4\u00df\u00dc\u00d6\u00c4]*(?=<\/span>)')
         self.__pattern_href = re.compile(r'href="')
-        self.__next_link = next_link
 
+        self.__next_link = next_link
         self.__page_available = True
         self.DbConn = DbConnector(table)
         self.scraped_pages = 0
@@ -49,8 +51,7 @@ class Scraper():
         time.sleep(1) #avoid early scroll start
         return None
 
-
-    # scroll slowly through page
+    ''''necessary function since page is dynamically loaded'''
     def scroll_page(self, speed:int=500) -> None:
         page_height = self.driver.execute_script("return document.documentElement.scrollHeight")
         current_height = 0
@@ -59,17 +60,19 @@ class Scraper():
             self.driver.execute_script("window.scrollTo(0," + str(current_height) + ")")
 
 
+    '''identify all "portperty" elements'''
     def find_elements(self) -> list:
         self.elements = self.driver.find_elements('css selector','.Box-sc-wfmb7k-0.ResultListAdRowLayout___StyledBox-sc-1rmys2w-0.ginNzk.dZyCtF')
 
 
     def next_page(self) -> bool:
-        next_page = self.driver.find_element('xpath',self.__next_link)  # select last element of page buttons (next button) - maybe needs to be altered depending on request
+        next_page = self.driver.find_element('xpath',self.__next_link)
 
         next_page_html = next_page.get_attribute('innerHTML')
         next_page.click()
         
-        if len(re.findall(self.__pattern_href, str(next_page_html))) == 0: #check if button is possible to click
+        '''check if button is clickable'''
+        if len(re.findall(self.__pattern_href, str(next_page_html))) == 0:
             self.__page_available = False
         else:
             self.__page_available = True
@@ -100,15 +103,15 @@ class Scraper():
         
         self.driver.get(self.link)
         self.deny_dataprivacy_notice()
-
-        # setup necessary parameters
         self.start_time = datetime.now()
+
+        '''loop to iterate through all available pages'''
         while self.__page_available:
             self.scraped_pages += 1
             self.scroll_page()
             self.find_elements()
 
-            # iterate through elements to extract data
+            '''loop to iterate through all available "property" elements'''
             for elem in self.elements:
                 elem_html = elem.get_attribute('innerHTML')
                 elem_soup = bs.BeautifulSoup(elem_html, 'html.parser')
@@ -117,13 +120,10 @@ class Scraper():
 
             print(f'PageNr.: {self.scraped_pages}')
             print(f'elements: {len(self.elements)}')
-
             self.next_page()
+
         self.driver.close()
         self.driver.quit()
         print('SCRAPING FINISHED')
         print(f'Pages: {self.scraped_pages}')
         print(f'It took {datetime.now()-self.start_time}')
-
-
-

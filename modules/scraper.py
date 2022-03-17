@@ -14,7 +14,7 @@ from .db_connector import DbConnector
 class Scraper():
     '''Class which provides functions for scraping'''
 
-    def __init__(self, link:str, table:str, next_link:str, headless:bool=True) -> None:
+    def __init__(self, link:str, table:str, next_xpath:str, headless:bool=True) -> None:
         self.__headless = headless  # allows to diable headless option for test purposes
 
         '''regex patterns to locate necessary elements'''
@@ -23,7 +23,7 @@ class Scraper():
         self._pattern_features = re.compile(r'(?<=<span class=\"Text-sc-10o2fdq-0 iyzLep\"> )(?:<!-- -->|)[a-zA-Z/\u00fc\u00f6\u00e4\u00df\u00dc\u00d6\u00c4]*(?=<\/span>)')
         self.__pattern_href = re.compile(r'href="')
 
-        self.__next_link = next_link
+        self.__next_xpath = next_xpath
         self.__page_available = True
         self.DbConn = DbConnector(table)
         self.scraped_pages = 0
@@ -66,7 +66,7 @@ class Scraper():
 
 
     def next_page(self) -> bool:
-        next_page = self.driver.find_element('xpath',self.__next_link)
+        next_page = self.driver.find_element('xpath',self.__next_xpath)
 
         next_page_html = next_page.get_attribute('innerHTML')
         next_page.click()

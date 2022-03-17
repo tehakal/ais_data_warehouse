@@ -17,11 +17,11 @@ class DbConnector:
             with conn.cursor() as cur:
                 cur.execute(sql_str, vars=data_entry_vars)
 
-    def insert_db(self, data_entry_vars:dict):
+    def insert_db(self, data_entry_vars:dict) -> None:
         sql_str = "INSERT INTO " + self.table + "(title, location, footage, rooms, features, price, seller, url) VALUES (%(title)s, %(location)s, %(footage)s, %(rooms)s, %(features)s, %(price)s, %(seller)s, %(url)s);"
         self.__exec_sql(sql_str, data_entry_vars)
 
-    def create_table(self):
+    def create_table(self) -> None:
         sql_str = "CREATE TABLE " + self.table + "(id serial PRIMARY KEY, title varchar, location varchar, footage varchar, rooms int, features varchar, price varchar, seller varchar, url varchar);"
         try:
             self.__exec_sql(sql_str)
@@ -31,7 +31,7 @@ class DbConnector:
             input('Press enter to continue.')
             sys.exit()
 
-    def drop_table(self):
+    def drop_table(self) -> None:
         sql_str = "DROP TABLE " + self.table + ";"
         self.__exec_sql(sql_str)
         

@@ -14,12 +14,13 @@ from .db_connector import DbConnector
 
 class Scraper():
 
-    def __init__(self, link:str, table:str, headless:bool=True) -> None:
+    def __init__(self, link:str, table:str, next_link:str, headless:bool=True) -> None:
         self.__headless = headless
         self._pattern_room = re.compile(r'\d+(?=<\/span><span class=\"Text-sc-10o2fdq-0 iyzLep\"> (<!-- -->)?Zimmer)')
         self._pattern_footage = re.compile(r'\d+(?=<\/span><span class=\"Text-sc-10o2fdq-0 iyzLep\"> (<!-- -->)?m²)')
         self._pattern_features = re.compile(r'(?<=<span class=\"Text-sc-10o2fdq-0 iyzLep\"> )(?:<!-- -->|)[a-zA-Z/\u00fc\u00f6\u00e4\u00df\u00dc\u00d6\u00c4]*(?=<\/span>)')
         self.__pattern_href = re.compile(r'href="')
+        self.__next_link = next_link
 
         self.__page_available = True
         self.DbConn = DbConnector(table)
@@ -50,7 +51,7 @@ class Scraper():
 
 
     # scroll slowly through page
-    def scroll_page(self, speed:int=400) -> None:
+    def scroll_page(self, speed:int=500) -> None:
         page_height = self.driver.execute_script("return document.documentElement.scrollHeight")
         current_height = 0
         while current_height < page_height:
@@ -63,7 +64,7 @@ class Scraper():
 
 
     def next_page(self) -> bool:
-        next_page = self.driver.find_element('xpath','/html/body/div[2]/div[1]/div[2]/div[1]/div/div[1]/div[3]/div/div/div[3]/div[2]/div[2]/div[1]/div[2]/div[1]/nav/ul/li[last()]')  # select last element of page buttons (next button) - maybe needs to be altered depending on request
+        next_page = self.driver.find_element('xpath',self.__next_link)  # select last element of page buttons (next button) - maybe needs to be altered depending on request
 
         next_page_html = next_page.get_attribute('innerHTML')
         next_page.click()
@@ -118,7 +119,8 @@ class Scraper():
             print(f'elements: {len(self.elements)}')
 
             self.next_page()
-        
+        self.driver.close()
+        self.driver.quit()
         print('SCRAPING FINISHED')
         print(f'Pages: {self.scraped_pages}')
         print(f'It took {datetime.now()-self.start_time}')
